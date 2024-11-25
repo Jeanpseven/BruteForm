@@ -18,20 +18,20 @@ def separate_url(url):
     endpoint = parsed_url.path if parsed_url.path else "/"
     return host, endpoint
 
-# Função para obter a mensagem de erro usando curl
+# Função para obter o código de status HTTP usando curl
 def get_error_message(url, username_field, password_field):
-    # Comando curl para enviar uma solicitação POST com credenciais inválidas
-    curl_command = f'curl -d "{username_field}=invalid_user&{password_field}=invalid_pass" {url}'
-    
+    # Comando curl para enviar uma solicitação POST com credenciais inválidas, retornando apenas o código de status
+    curl_command = f'curl -o /dev/null -s -w "%{{http_code}}" -d "{username_field}=invalid_user&{password_field}=invalid_pass" {url}'
+
     # Executar o comando curl e capturar a saída
     result = subprocess.run(curl_command, shell=True, capture_output=True, text=True)
-    
+
     if result.returncode != 0:
         print("Erro ao executar o comando curl.")
         print(result.stderr)
         sys.exit(1)
-    
-    # Retornar a saída do curl
+
+    # Retornar o código de status HTTP
     return result.stdout
 
 # Inputs do usuário
